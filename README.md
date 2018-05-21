@@ -1,1 +1,1 @@
-# drv8711gui
+GUI for config drv8711
