@@ -30,6 +30,7 @@ signals:
     void sendmes(QString, int);
     void RegisterUpdate (int addr);
     void des();
+    void SendToPort (QByteArray);
 
 public slots:
    int Mopen();
@@ -38,6 +39,7 @@ public slots:
    int portSet();
    void RecivSet(QString, qint32);
    void UpdateVisual(int addr);
+   void WriteAll();
 
 private:
     Ui::MainWindow *ui;

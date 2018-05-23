@@ -101,8 +101,31 @@ MainWindow::MainWindow(QWidget *parent) :
        connect (setting_port, SIGNAL(SendSet(QString, qint32)),PortNew, SLOT(Write_Settings_Port(QString, qint32)));
        connect (ui->ConnB, SIGNAL(clicked(bool)), PortNew, SLOT(ConnectPort()));
        connect (ui->DConnB, SIGNAL(clicked(bool)), PortNew, SLOT(DisconnectPort()));
+       connect(ui->WRITE_MCU, SIGNAL(clicked(bool)), this, SLOT(WriteAll()));
+       connect(this, SIGNAL(SendToPort(QByteArray)),PortNew, SLOT(WriteToPort(QByteArray)));
     }
+void MainWindow::WriteAll()
+{
+    QByteArray tmp;
+    quint16 crc;
+    QDataStream out(&tmp, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_9);
+    out << (quint8) 0x24; // Start
+    out << (quint8) 0x05; // Command send all reg
+    out << (quint16) 0;    // Hi byte size
+    for (quint8 i = 0; i<7; i++)
+      {
+       out << (quint16) DRIVER->GetREG(i);
+      }
+    crc = crc16 (tmp, tmp.size());
+    out << (quint16) crc;
+    out << (quint8) 10;
+    out << (quint8) 13;
+    tmp[2] = 0;
+    tmp[3] = 8;
+    emit (SendToPort(tmp));
 
+}
 void MainWindow::upd( quint8 addr)
 {
     switch (addr)
@@ -542,6 +565,7 @@ void MainWindow::UpdateVisual(int addr)
             break;
           }
       }
+
 }
 void MainWindow::GetSinglReg(int v)
 {
