@@ -94,6 +94,7 @@ private:
     int savef(QString path);
     void upd( quint8 addr);
     quint16 crc16 (QByteArray data, quint16 lenght);
+    void WriteReg(quint8 addr);
 
 private slots:
     void CTRL_Update( void );
