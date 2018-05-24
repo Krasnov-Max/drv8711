@@ -32,6 +32,7 @@ signals:
     void des();
     void SendToPort (QByteArray);
 
+
 public slots:
    int Mopen();
    int Msave();
@@ -40,6 +41,7 @@ public slots:
    void RecivSet(QString, qint32);
    void UpdateVisual(int addr);
    void WriteAll();
+   void ResetError();
 
 private:
     Ui::MainWindow *ui;
@@ -94,8 +96,10 @@ private:
     int savef(QString path);
     void upd( quint8 addr);
     quint16 crc16 (QByteArray data, quint16 lenght);
+    void WriteReg(quint8 addr);
 
 private slots:
+    void _errorport(QString str);
     void CTRL_Update( void );
     void TORQUE_Update( void );
     void OFF_Update( void );

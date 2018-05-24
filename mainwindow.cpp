@@ -103,6 +103,8 @@ MainWindow::MainWindow(QWidget *parent) :
        connect (ui->DConnB, SIGNAL(clicked(bool)), PortNew, SLOT(DisconnectPort()));
        connect(ui->WRITE_MCU, SIGNAL(clicked(bool)), this, SLOT(WriteAll()));
        connect(this, SIGNAL(SendToPort(QByteArray)),PortNew, SLOT(WriteToPort(QByteArray)));
+       connect (ui->Reset_Error, SIGNAL(clicked(bool)), this, SLOT(ResetError()));
+       connect (PortNew, SIGNAL(error_(QString)), this, SLOT(_errorport(QString)));
     }
 void MainWindow::WriteAll()
 {
@@ -110,21 +112,63 @@ void MainWindow::WriteAll()
     quint16 crc;
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
-    out << (quint8) 0x24; // Start
-    out << (quint8) 0x05; // Command send all reg
-    out << (quint16) 0;    // Hi byte size
+    tmp.clear();
+    out << ((quint8) 0x24);
+    out << ((quint8) 0x01);
+    out << ((quint8) 0x00);
+    //out << ((quint8) 14);
+    out << ((quint8) (7*sizeof(quint16)));
     for (quint8 i = 0; i<7; i++)
       {
-       out << (quint16) DRIVER->GetREG(i);
+        out << ((quint16) DRIVER->GetREG(i));
       }
     crc = crc16 (tmp, tmp.size());
-    out << (quint16) crc;
-    out << (quint8) 10;
-    out << (quint8) 13;
-    tmp[2] = 0;
-    tmp[3] = 8;
+    out << ((quint16) crc);
+    out << ((quint8) 0x0A);
+    out << ((quint8) 0x0D);
+    qDebug() << ((quint8) (7*sizeof(quint16)));
     emit (SendToPort(tmp));
 
+}
+void MainWindow::WriteReg(quint8 addr)
+{
+    QByteArray tmp;
+    quint16 crc;
+    QDataStream out(&tmp, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_9);
+    tmp.clear();
+    out << ((quint8) 0x24);
+    out << ((quint8) 0x01);
+    out << ((quint8) addr);
+    out << ((quint8) (1*sizeof(quint16)));
+    out << ((quint16) DRIVER->GetREG(addr));
+    crc = crc16 (tmp, tmp.size());
+    out << ((quint16) crc);
+    out << ((quint8) 0x0A);
+    out << ((quint8) 0x0D);
+    emit (SendToPort(tmp));
+
+}
+void MainWindow::ResetError()
+{
+    QByteArray tmp;
+    quint16 crc;
+    QDataStream out(&tmp, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_9);
+    tmp.clear();
+    out << ((quint8) 0x24);
+    out << ((quint8) 0x01);
+    out << ((quint8) 0x07);
+    out << ((quint8) (1*sizeof(quint16)));
+    quint16 tmp1 = DRIVER->GetREG(0x07);
+    tmp1 = 0;
+    out << ((quint16) tmp1);
+    crc = crc16 (tmp, tmp.size());
+    out << ((quint16) crc);
+    out << ((quint8) 0x0A);
+    out << ((quint8) 0x0D);
+    DRIVER->SetREG(0x07, tmp1);
+    emit (SendToPort(tmp));
 }
 void MainWindow::upd( quint8 addr)
 {
@@ -482,7 +526,7 @@ void MainWindow::UpdateVisual(int addr)
            {
                ui->Value_singale_reg->setSpecialValueText("0x"+s);
            }
-
+           WriteReg(addr);
            break;
         case DRV8711_TORQUE:
           s.clear();
@@ -493,6 +537,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
+          WriteReg(addr);
           break;
         case DRV8711_OFF:
           s.clear();
@@ -503,6 +548,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
+          WriteReg(addr);
           break;
         case DRV8711_BLANK:
           s.clear();
@@ -513,6 +559,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
+          WriteReg(addr);
           break;
         case DRV8711_DECAY:
           s.clear();
@@ -523,6 +570,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
+          WriteReg(addr);
           break;
         case DRV8711_STALL:
           s.clear();
@@ -533,6 +581,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
+          WriteReg(addr);
           break;
         case DRV8711_DRIVE:
           s.clear();
@@ -543,6 +592,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
+          WriteReg(addr);
           break;
         case DRV8711_STATUS:
           {
@@ -616,3 +666,7 @@ f.close();
 return 0;
 }
 
+void MainWindow::_errorport(QString str)
+{
+    this->statusBar->showMessage(str);
+}

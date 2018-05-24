@@ -7,11 +7,11 @@ rs232::rs232(QObject *parent) :
 }
 rs232::~rs232()
 {
-    qDebug("By in Thread!");
+  //  qDebug("By in Thread!");
     emit finished_Port();//Сигнал о завершении работы
 }
 void rs232 :: process_Port(){//Выполняется при старте класса
-    qDebug("Hello World in Thread!");
+  //  qDebug("Hello World in Thread!");
     connect(&thisPort,SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(handleError(QSerialPort::SerialPortError))); // подключаем проверку ошибок порта
     connect(&thisPort, SIGNAL(readyRead()),this,SLOT(ReadInPort()));//подключаем   чтение с порта по сигналу readyRead()
 }
@@ -22,7 +22,7 @@ void rs232 :: Write_Settings_Port(QString name, qint32 bound){//заносим �
     SettingsPort.parity = (QSerialPort::Parity) QSerialPort::NoParity;
     SettingsPort.stopBits = (QSerialPort::StopBits) QSerialPort::OneStop;
     SettingsPort.flowControl = (QSerialPort::FlowControl) QSerialPort::NoFlowControl;
-    qDebug() << "WritePortSetting" << SettingsPort.name << SettingsPort.baudRate;
+  //  qDebug() << "WritePortSetting" << SettingsPort.name << SettingsPort.baudRate;
 }
 void rs232 :: ConnectPort(void){//процедура подключения
     thisPort.setPortName(SettingsPort.name);
@@ -34,7 +34,7 @@ void rs232 :: ConnectPort(void){//процедура подключения
                 && thisPort.setFlowControl(SettingsPort.flowControl))
         {
             if (thisPort.isOpen()){
-                error_((SettingsPort.name+ " >> Открыт!\r").toLocal8Bit());
+                error_((SettingsPort.name+ tr(" >> Open!\r")).toLocal8Bit());
             }
         } else {
             thisPort.close();
@@ -55,7 +55,7 @@ void rs232::handleError(QSerialPort::SerialPortError error)//проверка о
 void  rs232::DisconnectPort(){//Отключаем порт
     if(thisPort.isOpen()){
         thisPort.close();
-        error_(SettingsPort.name.toLocal8Bit() + " >> Закрыт!\r");
+        error_(SettingsPort.name.toLocal8Bit() + tr(" >> Close!\r"));
     }
 }
 void rs232::WriteToPort(QByteArray data){//Запись данных в порт
