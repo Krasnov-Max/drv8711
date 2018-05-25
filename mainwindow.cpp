@@ -126,47 +126,10 @@ void MainWindow::WriteAll()
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
-    qDebug() << ((quint8) (7*sizeof(quint16)));
-    tmp[0]= (quint8) 0x24; // Start
-    tmp[1]= (quint8) 0x01; // Command send all reg
-    tmp[2]= (quint8) 0x00; // Sub command (addres reg) all
-    tmp[3]= (quint8) 7*sizeof(quint16); // Byte size data
-    quint8 j = 0;
-    for (quint8 i = 0; i<7; i++)
-      {
-       tmp[4+j]= (quint8) (DRIVER->GetREG(i) >> 8);
-       tmp[5+j]= (quint8) (DRIVER->GetREG(i) & 0x00FF);
-       j++;
-       j++;
-      }
-    crc = crc16 (tmp, tmp.size());
-    tmp[18]= (quint8) (crc >> 8);
-    tmp[19]= (quint8) (crc & 0x00FF);
-    tmp[20]= (quint8) 10;
-    tmp[21]= (quint8) 13;
     emit (SendToPort(tmp));
 
 }
-void MainWindow::WriteReg(quint8 addr)
-{
-    QByteArray tmp;
-    quint16 crc;
-    QDataStream out(&tmp, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_9);
-    tmp[0]= (quint8) 0x24; // Start
-    tmp[1]= (quint8) 0x02; // Command send  reg
-    tmp[2]= (quint8) addr; // Sub Command addres reg
-    tmp[3]= (quint8) 1*sizeof(quint16); // Byte size data
-    tmp[4]= (quint8) (DRIVER->GetREG(addr) >> 8);
-    tmp[5]= (quint8) (DRIVER->GetREG(addr) & 0x00FF);
-    crc = crc16 (tmp, tmp.size());
-    tmp[6]= (quint8) (crc >> 8);
-    tmp[7]= (quint8) (crc & 0x00FF);
-    tmp[8]= (quint8) 10;
-    tmp[9]= (quint8) 13;
-    emit (SendToPort(tmp));
 
-}
 void MainWindow::WriteReg(quint8 addr)
 {
     QByteArray tmp;
