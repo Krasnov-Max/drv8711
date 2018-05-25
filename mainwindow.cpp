@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     {
        ui->setupUi(this);
        FPathOpen = "";
-        qDebug () << crc16_table[1];
        DRIVER = new STEP_MOTOR();
        QThread *thread_New = new QThread;//Создаем поток для порта платы
        rs232 *PortNew = new rs232();//Создаем обьект по классу
@@ -105,15 +104,18 @@ MainWindow::MainWindow(QWidget *parent) :
        connect(this, SIGNAL(SendToPort(QByteArray)),PortNew, SLOT(WriteToPort(QByteArray)));
        connect (ui->Reset_Error, SIGNAL(clicked(bool)), this, SLOT(ResetError()));
        connect (PortNew, SIGNAL(error_(QString)), this, SLOT(_errorport(QString)));
-	   
+       connect (ui->write_singel_reg, SIGNAL(clicked(bool)), this, SLOT(WriteSingelReg()));
+       connect (ui->StartMotor, SIGNAL(clicked(bool)), this, SLOT(StartMotor()));
+       connect (ui->StopMotor, SIGNAL(clicked(bool)), this, SLOT(StopMotor()));
     }
 void MainWindow::WriteAll()
 {
-    QByteArray tmp;
+    QByteArray tmp, tmp1;
     quint16 crc;
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
+    tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) 0x00);
@@ -122,7 +124,11 @@ void MainWindow::WriteAll()
       {
         out << ((quint16) DRIVER->GetREG(i));
       }
-    crc = crc16 (tmp, tmp.size());
+    for (quint8 j = 0; j<((quint8) (7*sizeof(quint16))); j++)
+      {
+        tmp1.insert(j,tmp[4+j]);
+      }
+    crc = crc16 (tmp1, tmp1.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
@@ -132,30 +138,71 @@ void MainWindow::WriteAll()
 
 void MainWindow::WriteReg(quint8 addr)
 {
-    QByteArray tmp;
+    QByteArray tmp, tmp1;
     quint16 crc;
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
+    tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) addr);
     out << ((quint8) (1*sizeof(quint16)));
     out << ((quint16) DRIVER->GetREG(addr));
-    crc = crc16 (tmp, tmp.size());
+    for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
+      {
+        tmp1.insert(j,tmp[4+j]);
+      }
+    crc = crc16 (tmp1, tmp1.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
     emit (SendToPort(tmp));
 
 }
-void MainWindow::ResetError()
+void MainWindow::StartMotor ()
 {
-    QByteArray tmp;
+  ui->CTRL_ENBL->setCurrentIndex(1);
+}
+void MainWindow::StopMotor ()
+{
+  ui->CTRL_ENBL->setCurrentIndex(0);
+}
+void MainWindow::ReadSingelReg ()
+{
+
+}
+void MainWindow::WriteSingelReg ()
+{
+    QByteArray tmp, tmp1;
     quint16 crc;
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
+    tmp1.clear();
+    out << ((quint8) 0x24);
+    out << ((quint8) 0x01);
+    out << ((quint8) ui->singl_reg->currentIndex());
+    out << ((quint8) (1*sizeof(quint16)));
+    out << ((quint16) DRIVER->GetREG(ui->singl_reg->currentIndex()));
+    for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
+      {
+        tmp1.insert(j,tmp[4+j]);
+      }
+    crc = crc16 (tmp1, tmp1.size());
+    out << ((quint16) crc);
+    out << ((quint8) 0x0A);
+    out << ((quint8) 0x0D);
+    emit (SendToPort(tmp));
+}
+void MainWindow::ResetError()
+{
+    QByteArray tmp, tmp2;
+    quint16 crc;
+    QDataStream out(&tmp, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_9);
+    tmp.clear();
+    tmp2.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) 0x07);
@@ -163,7 +210,11 @@ void MainWindow::ResetError()
     quint16 tmp1 = DRIVER->GetREG(0x07);
     tmp1 = 0;
     out << ((quint16) tmp1);
-    crc = crc16 (tmp, tmp.size());
+    for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
+      {
+        tmp2.insert(j,tmp[4+j]);
+      }
+    crc = crc16 (tmp2, tmp2.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
@@ -403,8 +454,6 @@ int MainWindow::Mopen()
     {
         FPathOpen = QFileDialog::getOpenFileName(0, "Open Dialog", "", "*.* *.h *.drv");
         MainWindow::setWindowTitle(FPathOpen);
-
-         qDebug() << FPathOpen;
         return 0;
     }
 int MainWindow::Msave()
@@ -415,7 +464,6 @@ int MainWindow::Msave()
           FPathOpen = QFileDialog::getSaveFileName(0,"Save",Date.toString("yyyyMMdd"),"*.drv");
         }
         MainWindow::setWindowTitle(FPathOpen);
-        qDebug() << FPathOpen;
         savef(FPathOpen);
         return 0;
     }
@@ -423,8 +471,7 @@ int MainWindow::Msaveas()
 {
   FPathOpen = QFileDialog::getSaveFileName(0,"Save As","","*.drv");
   MainWindow::setWindowTitle(FPathOpen);
-  qDebug() << FPathOpen;
-   savef(FPathOpen);
+  savef(FPathOpen);
   return 0;
 }
 
@@ -443,7 +490,6 @@ void MainWindow::RecivSet(QString name, qint32 boud)
 {
         MainWindow::port = name;
         MainWindow::boud = boud;
-        qDebug() << name << boud <<"MainWindow\n\r";
 }
 
 
@@ -644,7 +690,6 @@ int MainWindow::savef(QString path)
  QFile f(path);
  QByteArray dat, crc;
  QByteArray crc_now;
- qDebug() << path;
  if (!f.open(QIODevice::WriteOnly))
   {
    qDebug() << "Ошибка открытия для записи";

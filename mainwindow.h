@@ -109,7 +109,10 @@ private slots:
     void DRIVE_Update( void );
     void STATUS_Update(void);
     void GetSinglReg (int v);
-
+    void ReadSingelReg ();
+    void WriteSingelReg ();
+    void StartMotor ();
+    void StopMotor ();
 
 
 };

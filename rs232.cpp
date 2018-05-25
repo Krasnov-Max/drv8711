@@ -7,11 +7,9 @@ rs232::rs232(QObject *parent) :
 }
 rs232::~rs232()
 {
-  //  qDebug("By in Thread!");
-    emit finished_Port();//Сигнал о завершении работы
+   emit finished_Port();//Сигнал о завершении работы
 }
 void rs232 :: process_Port(){//Выполняется при старте класса
-  //  qDebug("Hello World in Thread!");
     connect(&thisPort,SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(handleError(QSerialPort::SerialPortError))); // подключаем проверку ошибок порта
     connect(&thisPort, SIGNAL(readyRead()),this,SLOT(ReadInPort()));//подключаем   чтение с порта по сигналу readyRead()
 }
@@ -22,8 +20,7 @@ void rs232 :: Write_Settings_Port(QString name, qint32 bound){//заносим �
     SettingsPort.parity = (QSerialPort::Parity) QSerialPort::NoParity;
     SettingsPort.stopBits = (QSerialPort::StopBits) QSerialPort::OneStop;
     SettingsPort.flowControl = (QSerialPort::FlowControl) QSerialPort::NoFlowControl;
-  //  qDebug() << "WritePortSetting" << SettingsPort.name << SettingsPort.baudRate;
-}
+ }
 void rs232 :: ConnectPort(void){//процедура подключения
     thisPort.setPortName(SettingsPort.name);
     if (thisPort.open(QIODevice::ReadWrite)) {
@@ -68,5 +65,4 @@ void rs232::ReadInPort(){//Чтение данных из порта
     QByteArray data;
     data.append(thisPort.readAll());
     outPort(data);
-    //((QString)(adr.toInt())).toLatin1().toHex()
 }
