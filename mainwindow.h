@@ -31,7 +31,8 @@ signals:
     void RegisterUpdate (int addr);
     void des();
     void SendToPort (QByteArray);
-
+    void portcon();
+    void portdescon();
 
 public slots:
    int Mopen();
@@ -113,7 +114,8 @@ private slots:
     void WriteSingelReg ();
     void StartMotor ();
     void StopMotor ();
-
+    void conn ();
+    void diconn();
 
 };
 

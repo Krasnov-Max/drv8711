@@ -45,3 +45,6 @@ FORMS += \
         mainwindow.ui \
     setting.ui \
     setting.ui
+
+RESOURCES += \
+    drv8711.qrc

@@ -1609,6 +1609,12 @@ The correct setting needs to be determined experimentally</string>
            <property name="text">
             <string>RESET ERROR</string>
            </property>
+           <property name="iconSize">
+            <size>
+             <width>60</width>
+             <height>60</height>
+            </size>
+           </property>
           </widget>
          </item>
         </layout>
@@ -1664,58 +1670,6 @@ The correct setting needs to be determined experimentally</string>
     </layout>
    </widget>
    <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>483</y>
-      <width>174</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_5">
-     <item row="0" column="0">
-      <widget class="QCommandLinkButton" name="READ_MCU">
-       <property name="text">
-        <string>READ MCU</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCommandLinkButton" name="WRITE_MCU">
-       <property name="text">
-        <string>WRITE MCU</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>11</x>
-      <y>20</y>
-      <width>171</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QPushButton" name="ConnB">
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="DConnB">
-       <property name="text">
-        <string>Disconnect</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>1010</x>
@@ -1775,6 +1729,125 @@ The correct setting needs to be determined experimentally</string>
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="ConnB">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>5</y>
+      <width>81</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Connect MCU</string>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="drv8711.qrc">
+      <normaloff>:/new/prefix1/ico/connect-512.png</normaloff>:/new/prefix1/ico/connect-512.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>32</width>
+      <height>32</height>
+     </size>
+    </property>
+    <property name="autoDefault">
+     <bool>true</bool>
+    </property>
+    <property name="default">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DConnB">
+    <property name="geometry">
+     <rect>
+      <x>104</x>
+      <y>5</y>
+      <width>81</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Disconnect MCU</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="drv8711.qrc">
+      <normaloff>:/new/prefix1/ico/disconnect-512.png</normaloff>:/new/prefix1/ico/disconnect-512.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>32</width>
+      <height>32</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>425</y>
+      <width>181</width>
+      <height>141</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QPushButton" name="READ_MCU">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Read MCU&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="whatsThis">
+        <string comment="Read MCU"/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="drv8711.qrc">
+         <normaloff>:/new/prefix1/ico/Chip2.png</normaloff>:/new/prefix1/ico/Chip2.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>60</width>
+         <height>60</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="WRITE_MCU">
+       <property name="toolTip">
+        <string>Write MCU</string>
+       </property>
+       <property name="whatsThis">
+        <string comment="Write MCU"/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="drv8711.qrc">
+         <normaloff>:/new/prefix1/ico/Chip1.png</normaloff>:/new/prefix1/ico/Chip1.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>60</width>
+         <height>60</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="action">
    <property name="text">
@@ -1819,7 +1892,9 @@ The correct setting needs to be determined experimentally</string>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="drv8711.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>MainWindow</sender>

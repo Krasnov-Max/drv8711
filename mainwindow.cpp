@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
        connecting->addAction(PortSettings);
        ui->DConnB->setDisabled(true);
        ui->DConnB->setEnabled(false);
+       //ui->DConnB->s
        ui->spinBox->setReadOnly(true);
        ui->spinBox_2->setReadOnly(true);
        ui->spinBox_3->setReadOnly(true);
@@ -98,8 +99,10 @@ MainWindow::MainWindow(QWidget *parent) :
        connect(ui->singl_reg, SIGNAL(currentIndexChanged(int)),this,SLOT(GetSinglReg(int)));
        connect(thread_New, SIGNAL(started()), PortNew, SLOT(process_Port()));//Переназначения метода run
        connect (setting_port, SIGNAL(SendSet(QString, qint32)),PortNew, SLOT(Write_Settings_Port(QString, qint32)));
-       connect (ui->ConnB, SIGNAL(clicked(bool)), PortNew, SLOT(ConnectPort()));
-       connect (ui->DConnB, SIGNAL(clicked(bool)), PortNew, SLOT(DisconnectPort()));
+       connect (ui->ConnB, SIGNAL(clicked(bool)), this, SLOT(conn()));
+       connect (ui->DConnB, SIGNAL(clicked(bool)), this, SLOT(diconn()));
+       connect (this, SIGNAL(portcon()), PortNew, SLOT(ConnectPort()));
+       connect (this, SIGNAL(portdescon()), PortNew, SLOT(DisconnectPort()));
        connect(ui->WRITE_MCU, SIGNAL(clicked(bool)), this, SLOT(WriteAll()));
        connect(this, SIGNAL(SendToPort(QByteArray)),PortNew, SLOT(WriteToPort(QByteArray)));
        connect (ui->Reset_Error, SIGNAL(clicked(bool)), this, SLOT(ResetError()));
@@ -108,6 +111,22 @@ MainWindow::MainWindow(QWidget *parent) :
        connect (ui->StartMotor, SIGNAL(clicked(bool)), this, SLOT(StartMotor()));
        connect (ui->StopMotor, SIGNAL(clicked(bool)), this, SLOT(StopMotor()));
     }
+void MainWindow::conn ()
+{
+    ui->DConnB->setEnabled(true);
+    ui->DConnB->setDisabled(false);
+    ui->ConnB->setDisabled(true);
+    ui->ConnB->setEnabled(false);
+    emit portcon();
+}
+void MainWindow::diconn()
+{
+    ui->DConnB->setDisabled(true);
+    ui->DConnB->setEnabled(false);
+    ui->ConnB->setEnabled(true);
+    ui->ConnB->setDisabled(false);
+    emit this->portdescon();
+}
 void MainWindow::WriteAll()
 {
     QByteArray tmp, tmp1;
