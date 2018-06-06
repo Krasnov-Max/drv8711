@@ -29,6 +29,9 @@ MainWindow::MainWindow(QWidget *parent) :
        openAction = new QAction(tr("&Open"), this);
        exitAction = new QAction(tr("&Exit"), this);
        PortSettings = new QAction(tr("&PortSettings"), this);
+       QIcon ic;
+       ic.addFile(":/new/prefix1/ico/Chip.png", QSize(64,64));
+       // PortSettings->setIcon(ic);
        setting_port = new setting();
 
        fileMenu = menuBar()->addMenu(tr("&File"));
@@ -38,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
        fileMenu->addSeparator();
        fileMenu->addAction(exitAction);
        connecting = menuBar()->addMenu(tr("&Connect settings"));
+       connecting->setIcon(ic);
        connecting->addAction(PortSettings);
        ui->DConnB->setDisabled(true);
        ui->DConnB->setEnabled(false);
@@ -111,6 +115,15 @@ MainWindow::MainWindow(QWidget *parent) :
        connect (ui->StartMotor, SIGNAL(clicked(bool)), this, SLOT(StartMotor()));
        connect (ui->StopMotor, SIGNAL(clicked(bool)), this, SLOT(StopMotor()));
     }
+quint8 MainWindow::GetCurrentRegisterValue(double res, quint8 current, quint8 isgain)
+{
+
+}
+double MainWindow::GetCurrentValue(quint8 RegValue, double res, quint8 isgain)
+{
+
+}
+
 void MainWindow::conn ()
 {
     ui->DConnB->setEnabled(true);
@@ -707,27 +720,24 @@ quint16 MainWindow::crc16 (QByteArray data, quint16 lenght)
 int MainWindow::savef(QString path)
 {
  QFile f(path);
- QByteArray dat, crc;
- QByteArray crc_now;
+ QByteArray tmp;
+ quint16 crc;
+
  if (!f.open(QIODevice::WriteOnly))
   {
    qDebug() << "Ошибка открытия для записи";
    return -1;
   }
-QDataStream out(&dat, QIODevice::WriteOnly);
-out.setVersion(QDataStream::Qt_5_9);
-out << (quint8) 36;
-out << (quint16) 22;
-for (int i=0; i<8;i++)
-  {
-    out <<((quint16) DRIVER->GetREG(i));
-    crc_now[i] = DRIVER->GetREG(i);
-  }
-
-out  << (quint16) crc16 (crc_now, 8) << (quint8) 10 << (quint8) 13;
-f.write(dat, dat.size());
-f.close();
-return 0;
+ QDataStream out(&tmp, QIODevice::WriteOnly);
+ out.setVersion(QDataStream::Qt_5_9);
+ tmp.clear();
+ for (quint8 i=0; i<8; i++)
+ out << ((quint16) DRIVER->GetREG(i));
+ crc = crc16 (tmp, tmp.size());
+ out << ((quint16) crc);
+ f.write(tmp, tmp.size());
+ f.close();
+ return 0;
 }
 
 void MainWindow::_errorport(QString str)

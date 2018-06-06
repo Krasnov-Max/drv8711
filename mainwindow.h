@@ -98,6 +98,8 @@ private:
     void upd( quint8 addr);
     quint16 crc16 (QByteArray data, quint16 lenght);
     void WriteReg(quint8 addr);
+    quint8 GetCurrentRegisterValue(double res, quint8 current, quint8 isgain);
+    double GetCurrentValue(quint8 RegValue, double res, quint8 isgain);
 
 private slots:
     void _errorport(QString str);
