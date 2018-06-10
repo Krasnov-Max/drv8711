@@ -8,6 +8,7 @@
 #include <QList>
 #include <QFile>
 #include <QThread>
+#include <QToolBar>
 #include "setting.h"
 #include "drv8711.h"
 #include "rs232.h"
@@ -23,26 +24,17 @@ MainWindow::MainWindow(QWidget *parent) :
        QThread *thread_New = new QThread;//Создаем поток для порта платы
        rs232 *PortNew = new rs232();//Создаем обьект по классу
        statusBar = new QStatusBar(this);
-       MainWindow ::setStatusBar(statusBar);
-       saveAction = new QAction(tr("&Save"), this);
-       saveActionAs = new QAction(tr("&Save As"), this);
-       openAction = new QAction(tr("&Open"), this);
-       exitAction = new QAction(tr("&Exit"), this);
-       PortSettings = new QAction(tr("&PortSettings"), this);
-       QIcon ic;
-       ic.addFile(":/new/prefix1/ico/Chip.png", QSize(64,64));
-       // PortSettings->setIcon(ic);
+       MainWindow::setStatusBar(statusBar);
+
+
        setting_port = new setting();
 
-       fileMenu = menuBar()->addMenu(tr("&File"));
-       fileMenu->addAction(openAction);
-       fileMenu->addAction(saveAction);
-       fileMenu->addAction(saveActionAs);
-       fileMenu->addSeparator();
-       fileMenu->addAction(exitAction);
-       connecting = menuBar()->addMenu(tr("&Connect settings"));
-       connecting->setIcon(ic);
-       connecting->addAction(PortSettings);
+
+       ui->toolBar->addAction(QIcon(":/new/prefix1/ico/open.png"),tr("&Open"), this, SLOT( Mopen() ));
+       ui->toolBar->addAction(QIcon(":/new/prefix1/ico/save.png"),tr("&Save"), this, SLOT( Msave() ));
+       ui->toolBar->addAction(QIcon(":/new/prefix1/ico/saveas.png"),tr("&Save As"), this, SLOT( Msaveas() ));
+       ui->toolBar->addSeparator();
+       ui->toolBar->addAction(QIcon(":/new/prefix1/ico/settings.png"),tr("Settings"), this, SLOT( portSet() ));
        ui->DConnB->setDisabled(true);
        ui->DConnB->setEnabled(false);
        //ui->DConnB->s
@@ -61,11 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
        InitCheckBox ();
 
-       connect(PortSettings, SIGNAL( triggered() ), this, SLOT( portSet() ) );
-       connect(exitAction, SIGNAL( triggered() ), this, SLOT( close() ) );
-       connect(openAction, SIGNAL( triggered() ), this, SLOT( Mopen() ) );
-       connect(saveAction, SIGNAL( triggered() ), this, SLOT( Msave() ) );
-       connect(saveActionAs, SIGNAL( triggered() ), this, SLOT( Msaveas() ) );
+
        connect(ui->CTRL_DTME, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
        connect(ui->CTRL_ENBL, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
        connect(ui->CTRL_EXSTALL, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
@@ -493,7 +481,7 @@ int MainWindow::Msave()
         QDate Date = QDate::currentDate();
         if (FPathOpen == "")
         {
-          FPathOpen = QFileDialog::getSaveFileName(0,"Save",Date.toString("yyyyMMdd"),"*.drv");
+          FPathOpen = "./"+Date.toString("yyyyMMdd")+".drv";
         }
         MainWindow::setWindowTitle(FPathOpen);
         savef(FPathOpen);
