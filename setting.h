@@ -18,6 +18,8 @@ public:
 
 private:
     Ui::setting *ui;
+    int save();
+    int OpenSettings();
 
 signals:
     void SendSet(QString, qint32);

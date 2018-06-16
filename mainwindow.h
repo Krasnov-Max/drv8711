@@ -33,6 +33,7 @@ signals:
     void SendToPort (QByteArray);
     void portcon();
     void portdescon();
+    void SendSetPort(QString, qint32);
 
 public slots:
    int Mopen();
@@ -93,14 +94,14 @@ private:
                                 0x0220,0x8225,0x822F,0x022A,0x823B,0x023E,0x0234,0x8231,
                                 0x8213,0x0216,0x021C,0x8219,0x0208,0x820D,0x8207,0x0202
                                };
-    void InitCheckBox (void);
-    int savef(QString path);
-    void upd( quint8 addr);
+    void    InitCheckBox (void);
+    int     savef(QString path);
+    void    upd( quint8 addr);
     quint16 crc16 (QByteArray data, quint16 lenght);
-    void WriteReg(quint8 addr);
-    quint8 GetCurrentRegisterValue(double res, quint8 current, quint8 isgain);
-    double GetCurrentValue(quint8 RegValue, double res, quint8 isgain);
-
+    void    WriteReg(quint8 addr);
+    quint8  GetCurrentRegisterValue(double res, quint8 current, quint8 isgain);
+    double  GetCurrentValue(quint8 RegValue, double res, quint8 isgain);
+    int     OpenSettings();
 private slots:
     void _errorport(QString str);
     void CTRL_Update( void );

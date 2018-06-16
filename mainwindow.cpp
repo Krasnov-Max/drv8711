@@ -91,6 +91,7 @@ MainWindow::MainWindow(QWidget *parent) :
        connect(ui->singl_reg, SIGNAL(currentIndexChanged(int)),this,SLOT(GetSinglReg(int)));
        connect(thread_New, SIGNAL(started()), PortNew, SLOT(process_Port()));//Переназначения метода run
        connect (setting_port, SIGNAL(SendSet(QString, qint32)),PortNew, SLOT(Write_Settings_Port(QString, qint32)));
+       connect (this, SIGNAL(SendSetPort(QString, qint32)),PortNew, SLOT(Write_Settings_Port(QString, qint32)));
        connect (ui->ConnB, SIGNAL(clicked(bool)), this, SLOT(conn()));
        connect (ui->DConnB, SIGNAL(clicked(bool)), this, SLOT(diconn()));
        connect (this, SIGNAL(portcon()), PortNew, SLOT(ConnectPort()));
@@ -102,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
        connect (ui->write_singel_reg, SIGNAL(clicked(bool)), this, SLOT(WriteSingelReg()));
        connect (ui->StartMotor, SIGNAL(clicked(bool)), this, SLOT(StartMotor()));
        connect (ui->StopMotor, SIGNAL(clicked(bool)), this, SLOT(StopMotor()));
+       if (MainWindow::OpenSettings() != -1) {emit SendSetPort(MainWindow::port, MainWindow::boud);}
     }
 quint8 MainWindow::GetCurrentRegisterValue(double res, quint8 current, quint8 isgain)
 {
@@ -135,7 +137,7 @@ void MainWindow::WriteAll()
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-    tmp1.clear();
+   // tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) 0x00);
@@ -144,11 +146,11 @@ void MainWindow::WriteAll()
       {
         out << ((quint16) DRIVER->GetREG(i));
       }
-    for (quint8 j = 0; j<((quint8) (7*sizeof(quint16))); j++)
-      {
-        tmp1.insert(j,tmp[4+j]);
-      }
-    crc = crc16 (tmp1, tmp1.size());
+  //  for (quint8 j = 0; j<((quint8) (7*sizeof(quint16))); j++)
+  //    {
+  //      tmp1.insert(j,tmp[4+j]);
+  //    }
+    crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
@@ -163,17 +165,17 @@ void MainWindow::WriteReg(quint8 addr)
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-    tmp1.clear();
+    //tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) addr);
     out << ((quint8) (1*sizeof(quint16)));
     out << ((quint16) DRIVER->GetREG(addr));
-    for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
-      {
-        tmp1.insert(j,tmp[4+j]);
-      }
-    crc = crc16 (tmp1, tmp1.size());
+    //for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
+    //  {
+    //    tmp1.insert(j,tmp[4+j]);
+    //  }
+    crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
@@ -199,17 +201,17 @@ void MainWindow::WriteSingelReg ()
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-    tmp1.clear();
+    //tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) ui->singl_reg->currentIndex());
     out << ((quint8) (1*sizeof(quint16)));
     out << ((quint16) DRIVER->GetREG(ui->singl_reg->currentIndex()));
-    for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
-      {
-        tmp1.insert(j,tmp[4+j]);
-      }
-    crc = crc16 (tmp1, tmp1.size());
+    //for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
+    //  {
+    //    tmp1.insert(j,tmp[4+j]);
+    //  }
+    crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
@@ -222,7 +224,7 @@ void MainWindow::ResetError()
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-    tmp2.clear();
+    //tmp2.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) 0x07);
@@ -230,11 +232,11 @@ void MainWindow::ResetError()
     quint16 tmp1 = DRIVER->GetREG(0x07);
     tmp1 = 0;
     out << ((quint16) tmp1);
-    for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
-      {
-        tmp2.insert(j,tmp[4+j]);
-      }
-    crc = crc16 (tmp2, tmp2.size());
+    //for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
+    //  {
+    //    tmp2.insert(j,tmp[4+j]);
+    //  }
+    crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
@@ -728,6 +730,24 @@ int MainWindow::savef(QString path)
  return 0;
 }
 
+int MainWindow::OpenSettings()
+{
+ QFile f("./setting.ini");
+ QByteArray tmp;
+ quint16 crc;
+ QString name;
+ qint32 boud;
+ if (!f.open(QIODevice::ReadOnly)) return -1;
+
+ QDataStream in(&f);
+ in.setVersion(QDataStream::Qt_5_9);
+ in >> name;
+ in >> boud;
+ f.close();
+ MainWindow::boud = boud;
+ MainWindow::port = name;
+ return 0;
+}
 void MainWindow::_errorport(QString str)
 {
     this->statusBar->showMessage(str);
