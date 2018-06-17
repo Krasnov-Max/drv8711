@@ -65,7 +65,7 @@ private:
     QSerialPort *serPort;
     QTreeWidget *TRegisters;
     STEP_MOTOR *DRIVER;
-    quint8 NotWrite;
+    quint8 NotWrite, Pass;
     QTimer *t1;
     const quint16 crc16_table[256] =
                                {

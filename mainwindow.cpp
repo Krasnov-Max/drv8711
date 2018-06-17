@@ -109,19 +109,25 @@ MainWindow::MainWindow(QWidget *parent) :
        connect (Dialog_mcu, SIGNAL(Yes()), this, SLOT(YES()));
        connect (Dialog_mcu, SIGNAL(No()), this, SLOT(NO()));
        if (MainWindow::OpenSettings() != -1) {emit SendSetPort(MainWindow::port, MainWindow::boud);}
-
+       Pass = 0;
 
     }
 void MainWindow::YES()
 {
-    NotWrite = 0;
+    NotWrite = 1;
+    t1->start(2000);
     Dialog_mcu->hide();
+    MainWindow::Openf(FPathOpen);
+    WriteAll();
 }
 
 void MainWindow::NO()
 {
     NotWrite = 1;
+    t1->start(2000);
     Dialog_mcu->hide();
+    MainWindow::Openf(FPathOpen);
+
 }
 void MainWindow::timestop()
 {
@@ -174,27 +180,29 @@ void MainWindow::WriteAll()
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
-    emit (SendToPort(tmp));
-
+     emit (SendToPort(tmp));
 }
 
 void MainWindow::WriteReg(quint8 addr)
 {
     QByteArray tmp, tmp1;
     quint16 crc;
-    QDataStream out(&tmp, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_9);
-    tmp.clear();
-    out << ((quint8) 0x24);
-    out << ((quint8) 0x01);
-    out << ((quint8) addr);
-    out << ((quint8) (1*sizeof(quint16)));
-    out << ((quint16) DRIVER->GetREG(addr));
-    crc = crc16 (tmp, tmp.size());
-    out << ((quint16) crc);
-    out << ((quint8) 0x0A);
-    out << ((quint8) 0x0D);
-    if (NotWrite != 1) { emit (SendToPort(tmp));}
+    if (NotWrite == 0)
+     {
+        QDataStream out(&tmp, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_5_9);
+        tmp.clear();
+        out << ((quint8) 0x24);
+        out << ((quint8) 0x01);
+        out << ((quint8) addr);
+        out << ((quint8) (1*sizeof(quint16)));
+        out << ((quint16) DRIVER->GetREG(addr));
+        crc = crc16 (tmp, tmp.size());
+        out << ((quint16) crc);
+        out << ((quint8) 0x0A);
+        out << ((quint8) 0x0D);
+        emit (SendToPort(tmp));
+     }
 
 }
 void MainWindow::StartMotor ()
@@ -225,7 +233,7 @@ void MainWindow::WriteSingelReg ()
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
-    emit (SendToPort(tmp));
+    if (NotWrite == 0) {emit (SendToPort(tmp));}
 }
 void MainWindow::ResetError()
 {
@@ -482,7 +490,7 @@ int MainWindow::Mopen()
         FPathOpen = QFileDialog::getOpenFileName(0, "Open Dialog", "", "*.*  *.drv");
         MainWindow::setWindowTitle(FPathOpen);
         Dialog_mcu->show();
-        MainWindow::Openf(FPathOpen);
+
         return 0;
     }
 int MainWindow::Msave()
@@ -601,7 +609,8 @@ void MainWindow::UpdateVisual(int addr)
            {
                ui->Value_singale_reg->setSpecialValueText("0x"+s);
            }
-           WriteReg(addr);
+           qDebug () << NotWrite;
+         //  WriteReg(addr);
            break;
         case DRV8711_TORQUE:
           s.clear();
@@ -612,7 +621,8 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
-          WriteReg(addr);
+          qDebug () << NotWrite;
+         // WriteReg(addr);
           break;
         case DRV8711_OFF:
           s.clear();
@@ -623,7 +633,8 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
-          WriteReg(addr);
+          qDebug () << NotWrite;
+         // WriteReg(addr);
           break;
         case DRV8711_BLANK:
           s.clear();
@@ -634,7 +645,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
-          WriteReg(addr);
+         // WriteReg(addr);
           break;
         case DRV8711_DECAY:
           s.clear();
@@ -645,7 +656,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
-          WriteReg(addr);
+         // WriteReg(addr);
           break;
         case DRV8711_STALL:
           s.clear();
@@ -656,7 +667,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
-          WriteReg(addr);
+         // WriteReg(addr);
           break;
         case DRV8711_DRIVE:
           s.clear();
@@ -667,7 +678,7 @@ void MainWindow::UpdateVisual(int addr)
           {
               ui->Value_singale_reg->setSpecialValueText("0x"+s);
           }
-          WriteReg(addr);
+        //  WriteReg(addr);
           break;
         case DRV8711_STATUS:
           {
@@ -690,7 +701,7 @@ void MainWindow::UpdateVisual(int addr)
             break;
           }
       }
-
+    WriteReg(addr);
 }
 void MainWindow::GetSinglReg(int v)
 {
@@ -742,7 +753,6 @@ int MainWindow::Openf(QString path)
     QByteArray tmp;
     quint16 crc;
     quint16 dat[9];
-    t1->start(2000);
     if (!f.open(QIODevice::ReadOnly))
      {
         qDebug() << "Ошибка открытия для записи";
@@ -763,7 +773,7 @@ int MainWindow::Openf(QString path)
     if (dat[8] != crc) {return -1;}
     for (quint8 i =0; i<8; i++)
       {
-        DRIVER->SetREG(i,dat[i]);
+       DRIVER->SetREG(i,dat[i]);
       }
     return 0;
 }
