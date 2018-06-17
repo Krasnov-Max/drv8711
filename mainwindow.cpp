@@ -12,6 +12,7 @@
 #include "setting.h"
 #include "drv8711.h"
 #include "rs232.h"
+#include "dialog.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -28,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
        setting_port = new setting();
-
+       Dialog_mcu = new Dialog();
 
        ui->toolBar->addAction(QIcon(":/new/prefix1/ico/open.png"),tr("&Open"), this, SLOT( Mopen() ));
        ui->toolBar->addAction(QIcon(":/new/prefix1/ico/save.png"),tr("&Save"), this, SLOT( Msave() ));
@@ -52,32 +53,33 @@ MainWindow::MainWindow(QWidget *parent) :
        thread_New->start();
 
        InitCheckBox ();
+       NotWrite = 0;
+       t1 = new QTimer();
 
-
-       connect(ui->CTRL_DTME, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
-       connect(ui->CTRL_ENBL, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
-       connect(ui->CTRL_EXSTALL, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
-       connect(ui->CTRL_ISGAIN, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
-       connect(ui->CTRL_MODE, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
-       connect(ui->CTRL_RDIR, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
-       connect(ui->CTRL_RSTEP, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
-       connect(ui->TORQUE_SMPLTH, SIGNAL(currentIndexChanged(int)), this, SLOT(TORQUE_Update( void )));
-       connect(ui->TORQUE_TORQUE, SIGNAL(valueChanged(int)), this, SLOT(TORQUE_Update( void )));
-       connect(ui->OFF_PWMMODE, SIGNAL(currentIndexChanged(int)), this, SLOT(OFF_Update( void )));
-       connect(ui->OFF_TOFF, SIGNAL(valueChanged(int)), this, SLOT(OFF_Update( void )));
-       connect(ui->BLANK_ABT, SIGNAL(currentIndexChanged(int)), this, SLOT(BLANK_Update( void )));
-       connect(ui->BLANK_TBLANK, SIGNAL(valueChanged(int)), this, SLOT(BLANK_Update( void )));
-       connect(ui->DECAY_DECMOD, SIGNAL(currentIndexChanged(int)), this, SLOT(DECAY_Update( void )));
-       connect(ui->DECAY_TDECAY, SIGNAL(valueChanged(int)), this, SLOT(DECAY_Update( void )));
-       connect(ui->STALL_SDCNT, SIGNAL(currentIndexChanged(int)), this, SLOT(STALL_Update( void )));
-       connect(ui->STALL_SDTHR, SIGNAL(valueChanged(int)), this, SLOT(STALL_Update( void )));
-       connect(ui->STALL_VDIV, SIGNAL(currentIndexChanged(int)), this, SLOT(STALL_Update( void )));
-       connect(ui->DRIVE_IDRIVEN, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
-       connect(ui->DRIVE_IDRIVEP, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
-       connect(ui->DRIVE_OCPDEG, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
-       connect(ui->DRIVE_OCPTH, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
-       connect(ui->DRIVE_TDRIVEN, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
-       connect(ui->DRIVE_TDRIVEP, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
+       connect (ui->CTRL_DTME, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
+       connect (ui->CTRL_ENBL, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
+       connect (ui->CTRL_EXSTALL, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
+       connect (ui->CTRL_ISGAIN, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
+       connect (ui->CTRL_MODE, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
+       connect (ui->CTRL_RDIR, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
+       connect (ui->CTRL_RSTEP, SIGNAL(currentIndexChanged(int)), this, SLOT(CTRL_Update( void )));
+       connect (ui->TORQUE_SMPLTH, SIGNAL(currentIndexChanged(int)), this, SLOT(TORQUE_Update( void )));
+       connect (ui->TORQUE_TORQUE, SIGNAL(valueChanged(int)), this, SLOT(TORQUE_Update( void )));
+       connect (ui->OFF_PWMMODE, SIGNAL(currentIndexChanged(int)), this, SLOT(OFF_Update( void )));
+       connect (ui->OFF_TOFF, SIGNAL(valueChanged(int)), this, SLOT(OFF_Update( void )));
+       connect (ui->BLANK_ABT, SIGNAL(currentIndexChanged(int)), this, SLOT(BLANK_Update( void )));
+       connect (ui->BLANK_TBLANK, SIGNAL(valueChanged(int)), this, SLOT(BLANK_Update( void )));
+       connect (ui->DECAY_DECMOD, SIGNAL(currentIndexChanged(int)), this, SLOT(DECAY_Update( void )));
+       connect (ui->DECAY_TDECAY, SIGNAL(valueChanged(int)), this, SLOT(DECAY_Update( void )));
+       connect (ui->STALL_SDCNT, SIGNAL(currentIndexChanged(int)), this, SLOT(STALL_Update( void )));
+       connect (ui->STALL_SDTHR, SIGNAL(valueChanged(int)), this, SLOT(STALL_Update( void )));
+       connect (ui->STALL_VDIV, SIGNAL(currentIndexChanged(int)), this, SLOT(STALL_Update( void )));
+       connect (ui->DRIVE_IDRIVEN, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
+       connect (ui->DRIVE_IDRIVEP, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
+       connect (ui->DRIVE_OCPDEG, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
+       connect (ui->DRIVE_OCPTH, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
+       connect (ui->DRIVE_TDRIVEN, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
+       connect (ui->DRIVE_TDRIVEP, SIGNAL(currentIndexChanged(int)), this, SLOT(DRIVE_Update( void )));
        connect (ui->STATUS_OTS, SIGNAL(clicked(bool)), this, SLOT(STATUS_Update( void )));
        connect (ui->STATUS_AOCP, SIGNAL(clicked(bool)), this, SLOT(STATUS_Update( void )));
        connect (ui->STATUS_BOCP, SIGNAL(clicked(bool)), this, SLOT(STATUS_Update( void )));
@@ -86,25 +88,48 @@ MainWindow::MainWindow(QWidget *parent) :
        connect (ui->STATUS_UVLO, SIGNAL(clicked(bool)), this, SLOT(STATUS_Update( void )));
        connect (ui->STATUS_STD, SIGNAL(clicked(bool)), this, SLOT(STATUS_Update( void )));
        connect (ui->STATUS_STDLAT, SIGNAL(clicked(bool)), this, SLOT(STATUS_Update( void )));
-       connect(this, SIGNAL(RegisterUpdate(int)), DRIVER, SLOT(update_single(int)));
-       connect(DRIVER, SIGNAL(UpdateRegister(int)), this, SLOT(UpdateVisual(int)));
-       connect(ui->singl_reg, SIGNAL(currentIndexChanged(int)),this,SLOT(GetSinglReg(int)));
-       connect(thread_New, SIGNAL(started()), PortNew, SLOT(process_Port()));//Переназначения метода run
+       connect (this, SIGNAL(RegisterUpdate(int)), DRIVER, SLOT(update_single(int)));
+       connect (DRIVER, SIGNAL(UpdateRegister(int)), this, SLOT(UpdateVisual(int)));
+       connect (ui->singl_reg, SIGNAL(currentIndexChanged(int)),this,SLOT(GetSinglReg(int)));
+       connect (thread_New, SIGNAL(started()), PortNew, SLOT(process_Port()));//Переназначения метода run
        connect (setting_port, SIGNAL(SendSet(QString, qint32)),PortNew, SLOT(Write_Settings_Port(QString, qint32)));
        connect (this, SIGNAL(SendSetPort(QString, qint32)),PortNew, SLOT(Write_Settings_Port(QString, qint32)));
        connect (ui->ConnB, SIGNAL(clicked(bool)), this, SLOT(conn()));
        connect (ui->DConnB, SIGNAL(clicked(bool)), this, SLOT(diconn()));
        connect (this, SIGNAL(portcon()), PortNew, SLOT(ConnectPort()));
        connect (this, SIGNAL(portdescon()), PortNew, SLOT(DisconnectPort()));
-       connect(ui->WRITE_MCU, SIGNAL(clicked(bool)), this, SLOT(WriteAll()));
-       connect(this, SIGNAL(SendToPort(QByteArray)),PortNew, SLOT(WriteToPort(QByteArray)));
+       connect (ui->WRITE_MCU, SIGNAL(clicked(bool)), this, SLOT(WriteAll()));
+       connect (this, SIGNAL(SendToPort(QByteArray)),PortNew, SLOT(WriteToPort(QByteArray)));
        connect (ui->Reset_Error, SIGNAL(clicked(bool)), this, SLOT(ResetError()));
        connect (PortNew, SIGNAL(error_(QString)), this, SLOT(_errorport(QString)));
        connect (ui->write_singel_reg, SIGNAL(clicked(bool)), this, SLOT(WriteSingelReg()));
        connect (ui->StartMotor, SIGNAL(clicked(bool)), this, SLOT(StartMotor()));
        connect (ui->StopMotor, SIGNAL(clicked(bool)), this, SLOT(StopMotor()));
+       connect (t1, SIGNAL(timeout()), this, SLOT(timestop()));
+       connect (Dialog_mcu, SIGNAL(Yes()), this, SLOT(YES()));
+       connect (Dialog_mcu, SIGNAL(No()), this, SLOT(NO()));
        if (MainWindow::OpenSettings() != -1) {emit SendSetPort(MainWindow::port, MainWindow::boud);}
+
+
     }
+void MainWindow::YES()
+{
+    NotWrite = 0;
+    Dialog_mcu->hide();
+}
+
+void MainWindow::NO()
+{
+    NotWrite = 1;
+    Dialog_mcu->hide();
+}
+void MainWindow::timestop()
+{
+    qDebug () << NotWrite;
+    t1->stop();
+    NotWrite = 0;
+    qDebug () << NotWrite;
+}
 quint8 MainWindow::GetCurrentRegisterValue(double res, quint8 current, quint8 isgain)
 {
 
@@ -137,7 +162,6 @@ void MainWindow::WriteAll()
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-   // tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) 0x00);
@@ -146,10 +170,6 @@ void MainWindow::WriteAll()
       {
         out << ((quint16) DRIVER->GetREG(i));
       }
-  //  for (quint8 j = 0; j<((quint8) (7*sizeof(quint16))); j++)
-  //    {
-  //      tmp1.insert(j,tmp[4+j]);
-  //    }
     crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
@@ -165,21 +185,16 @@ void MainWindow::WriteReg(quint8 addr)
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-    //tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) addr);
     out << ((quint8) (1*sizeof(quint16)));
     out << ((quint16) DRIVER->GetREG(addr));
-    //for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
-    //  {
-    //    tmp1.insert(j,tmp[4+j]);
-    //  }
     crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
     out << ((quint8) 0x0D);
-    emit (SendToPort(tmp));
+    if (NotWrite != 1) { emit (SendToPort(tmp));}
 
 }
 void MainWindow::StartMotor ()
@@ -201,16 +216,11 @@ void MainWindow::WriteSingelReg ()
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-    //tmp1.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) ui->singl_reg->currentIndex());
     out << ((quint8) (1*sizeof(quint16)));
     out << ((quint16) DRIVER->GetREG(ui->singl_reg->currentIndex()));
-    //for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
-    //  {
-    //    tmp1.insert(j,tmp[4+j]);
-    //  }
     crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
@@ -224,7 +234,6 @@ void MainWindow::ResetError()
     QDataStream out(&tmp, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_9);
     tmp.clear();
-    //tmp2.clear();
     out << ((quint8) 0x24);
     out << ((quint8) 0x01);
     out << ((quint8) 0x07);
@@ -232,10 +241,6 @@ void MainWindow::ResetError()
     quint16 tmp1 = DRIVER->GetREG(0x07);
     tmp1 = 0;
     out << ((quint16) tmp1);
-    //for (quint8 j = 0; j<((quint8) (1*sizeof(quint16))); j++)
-    //  {
-    //    tmp2.insert(j,tmp[4+j]);
-    //  }
     crc = crc16 (tmp, tmp.size());
     out << ((quint16) crc);
     out << ((quint8) 0x0A);
@@ -474,8 +479,10 @@ MainWindow::~MainWindow()
     }
 int MainWindow::Mopen()
     {
-        FPathOpen = QFileDialog::getOpenFileName(0, "Open Dialog", "", "*.* *.h *.drv");
+        FPathOpen = QFileDialog::getOpenFileName(0, "Open Dialog", "", "*.*  *.drv");
         MainWindow::setWindowTitle(FPathOpen);
+        Dialog_mcu->show();
+        MainWindow::Openf(FPathOpen);
         return 0;
     }
 int MainWindow::Msave()
@@ -729,12 +736,42 @@ int MainWindow::savef(QString path)
  f.close();
  return 0;
 }
+int MainWindow::Openf(QString path)
+{
+    QFile f(path);
+    QByteArray tmp;
+    quint16 crc;
+    quint16 dat[9];
+    t1->start(2000);
+    if (!f.open(QIODevice::ReadOnly))
+     {
+        qDebug() << "Ошибка открытия для записи";
+        return -1;
+     }
+    tmp.clear();
+    tmp = f.readAll();
+    qDebug() << tmp.size();
+    crc = crc16 (tmp, tmp.size()-2);
+    qDebug () << crc ;
+    QDataStream in(&tmp, QIODevice::ReadOnly);
+    in.setVersion(QDataStream::Qt_5_9);
+    for (quint8 i =0; i<9; i++)
+      {
+        in >> dat[i];
+      }
+    qDebug () << dat[8] ;
+    if (dat[8] != crc) {return -1;}
+    for (quint8 i =0; i<8; i++)
+      {
+        DRIVER->SetREG(i,dat[i]);
+      }
+    return 0;
+}
 
 int MainWindow::OpenSettings()
 {
  QFile f("./setting.ini");
  QByteArray tmp;
- quint16 crc;
  QString name;
  qint32 boud;
  if (!f.open(QIODevice::ReadOnly)) return -1;

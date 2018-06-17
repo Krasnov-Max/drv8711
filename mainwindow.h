@@ -9,8 +9,10 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QThread>
+#include <QTimer>
 #include "step_motor.h"
 #include "rs232.h"
+#include <dialog.h>
 
 namespace Ui {
 class MainWindow;
@@ -44,6 +46,9 @@ public slots:
    void UpdateVisual(int addr);
    void WriteAll();
    void ResetError();
+   void timestop();
+   void YES();
+   void NO ();
 
 private:
     Ui::MainWindow *ui;
@@ -56,9 +61,12 @@ private:
     QStatusBar *statusBar;
     QString FPathOpen,FPathSave ;
     setting *setting_port = NULL;
+    Dialog *Dialog_mcu;
     QSerialPort *serPort;
     QTreeWidget *TRegisters;
     STEP_MOTOR *DRIVER;
+    quint8 NotWrite;
+    QTimer *t1;
     const quint16 crc16_table[256] =
                                {
                                 0x0000,0x8005,0x800F,0x000A,0x801B,0x001E,0x0014,0x8011,
@@ -96,6 +104,7 @@ private:
                                };
     void    InitCheckBox (void);
     int     savef(QString path);
+    int     Openf(QString path);
     void    upd( quint8 addr);
     quint16 crc16 (QByteArray data, quint16 lenght);
     void    WriteReg(quint8 addr);

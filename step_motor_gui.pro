@@ -32,19 +32,22 @@ SOURCES += \
         mainwindow.cpp \
     setting.cpp \
     step_motor.cpp \
-    rs232.cpp
+    rs232.cpp \
+    dialog.cpp
 
 HEADERS += \
         mainwindow.h \
     setting.h \
     drv8711.h \
     step_motor.h \
-    rs232.h
+    rs232.h \
+    dialog.h
 
 FORMS += \
         mainwindow.ui \
     setting.ui \
-    setting.ui
+    setting.ui \
+    dialog.ui
 
 RESOURCES += \
     drv8711.qrc
